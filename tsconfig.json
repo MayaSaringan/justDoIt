@@ -63,7 +63,7 @@
     "./.eslintrc.js",
     "./declarations.d.ts",
     "./babel.config.js",
-    "./index.js",
+    "index.js",
     "./rn-cli.config.js",
     "./metro.config.js"
   ]
