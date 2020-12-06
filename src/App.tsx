@@ -1,7 +1,9 @@
 import React from 'react';
 import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
 import {Theme} from 'react-native-paper/lib/typescript/src/types';
+import {Provider as ReduxProvider} from 'react-redux';
 import Home from './Home';
+import store from './redux/store';
 
 type MyTheme = Theme & {
   colors: {
@@ -40,7 +42,7 @@ const theme: ThemeSelectorType = {
       primaryLight: '#66cbff',
       primaryDark: '#006cb0',
       accent: '#c778ff',
-      surface: '#2b3136',
+      surface: '#f5f5f2',
       onBackground: 'white',
       text: 'white',
       onSurface: 'black',
@@ -65,9 +67,11 @@ const Main = () => {
       <ThemeContext.Consumer>
         {(value: ThemeType) => {
           return (
-            <PaperProvider theme={value.theme}>
-              <App />
-            </PaperProvider>
+            <ReduxProvider store={store}>
+              <PaperProvider theme={value.theme}>
+                <App />
+              </PaperProvider>
+            </ReduxProvider>
           );
         }}
       </ThemeContext.Consumer>
