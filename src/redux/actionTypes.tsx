@@ -1,2 +1,0 @@
-export const SOCKET_SUCCESS = 'SOCKET_SUCCESS';
-export const SOCKET_FAILURE = 'SOCKET_FAILURE';

@@ -1,10 +1,24 @@
 import React from 'react';
-import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
+import {View} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {
+  withTheme,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from 'react-native-paper';
+
 import {Theme} from 'react-native-paper/lib/typescript/src/types';
 import {Provider as ReduxProvider} from 'react-redux';
-import Home from './Home';
+import changeNavigationBarColor from 'react-native-navigation-bar-color';
+import HomeScreen from './Home';
+import AddItem from './AddItem';
+import LoadingScreen from './Launch';
+import {RootStackParamList} from './common/NavigationParamList';
+
 import store from './redux/store';
 
+const RootStack = createStackNavigator<RootStackParamList>();
 type MyTheme = Theme & {
   colors: {
     primaryLight: string;
@@ -69,7 +83,7 @@ const Main = () => {
           return (
             <ReduxProvider store={store}>
               <PaperProvider theme={value.theme}>
-                <App />
+                <ThemedApp />
               </PaperProvider>
             </ReduxProvider>
           );
@@ -78,12 +92,41 @@ const Main = () => {
     </ThemeProvider>
   );
 };
-const App = () => {
+const App = ({theme}: any) => {
+  React.useEffect(() => {
+    changeNavigationBarColor(theme.colors.primary, !theme.colors.dark, true);
+  }, [theme.colors.primary, theme.colors.dark]);
   return (
     <>
-      <Home />
+      <View
+        style={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: theme.colors.primary,
+        }}>
+        <NavigationContainer>
+          <RootStack.Navigator>
+            <RootStack.Screen
+              name="Loading"
+              component={LoadingScreen}
+              options={{headerShown: false}}
+            />
+            <RootStack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{headerShown: false}}
+            />
+            <RootStack.Screen
+              name="AddItem"
+              component={AddItem}
+              options={{headerShown: false}}
+            />
+          </RootStack.Navigator>
+        </NavigationContainer>
+      </View>
     </>
   );
 };
+const ThemedApp = withTheme(App);
 
 export default Main;

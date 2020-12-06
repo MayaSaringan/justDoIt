@@ -12,16 +12,34 @@ type ModifyListActionType = BaseActionType & {
     listID: string | null | undefined;
   };
 };
-
+type GetListActionType = BaseActionType;
 export const addToList = (listID: string, toDo: Todo) => async (
   dispatch: Dispatch,
 ): Promise<ModifyListActionType> => {
-  console.log('in action addToList');
   return dispatch({
     type: 'ADD_TO_LIST',
     payload: {
       item: toDo,
       listID,
+    },
+  });
+};
+
+export const getList = () => async (
+  dispatch: Dispatch,
+): Promise<GetListActionType> => {
+  return dispatch({
+    type: 'GET_LIST',
+  });
+};
+export const deleteItem = (listID: string, toDo: Todo) => async (
+  dispatch: Dispatch,
+): Promise<ModifyListActionType> => {
+  return dispatch({
+    type: 'DELETE_ITEM',
+    payload: {
+      listID,
+      item: toDo,
     },
   });
 };

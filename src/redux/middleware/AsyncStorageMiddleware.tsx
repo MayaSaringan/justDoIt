@@ -1,40 +1,68 @@
 import {Middleware} from 'redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  clearAllData,
+  getFromStorage,
+  addItemToList,
+  deleteItemFromStorage,
+} from './AsyncStorageHelper';
 
+/*
+ * The middleware delegates to the above methods the job of manipulating the async storage.
+ * The middleware then forwards the success/failure of these methods as an action
+ */
 const middleware = (): Middleware<{}, any> => {
-  console.log('AsyncStorage middleare');
+  /** ****** NEXT LINE IS FOR TESTING:  ******** */
+  clearAllData();
+  console.log('AsyncStorage middleware added.');
   return ({dispatch, getState}) => (next) => (action) => {
-    console.log('middleware');
     if (typeof action === 'function') {
       return action(dispatch, getState);
     }
-    // perform side logic if any of the cases are fullfilled
-    switch (action.type) {
-      case 'ADD_TO_LIST': {
-        // Return status of attempt
-        // Must be a promise, as we need to wait for a response.
-        console.log('Adding to list');
 
-        const obj = {
-          [action.payload.listID]: {
-            items: {
-              [action.payload.item.id]: {
-                item: [action.payload.item.item],
+    switch (action.type) {
+      case 'ADD_TO_LIST':
+        console.log('Adding to list');
+        return addItemToList(action.payload.listID, action.payload.item)
+          .then((listsData: any) => {
+            next({
+              type: 'UPDATE_ROOM_ITEMS',
+              payload: {
+                lists: listsData,
               },
-            },
-          },
-        };
-        return AsyncStorage.setItem(`@lists`, JSON.stringify(obj))
-          .then(async () => {
-            try {
-              const jsonValue = await AsyncStorage.getItem('@lists');
-              const json = jsonValue != null ? JSON.parse(jsonValue) : null;
-              console.log(JSON.stringify(json));
-              next({type: 'UPDATE_ROOM_ITEMS', payload: {items: []}});
-            } catch (e) {
-              console.log('ERR');
-              // read error
-            }
+            });
+            return next({type: 'LIST_OPERATION_SUCCESS'});
+          })
+          .catch((err: any) => {
+            return next({type: 'LIST_OPERATION_FAILURE', result: err});
+          });
+      case 'DELETE_ITEM':
+        console.log('Deleting from list');
+        return deleteItemFromStorage(
+          action.payload.listID,
+          action.payload.item.id,
+        )
+          .then((listsData: any) => {
+            next({
+              type: 'UPDATE_ROOM_ITEMS',
+              payload: {
+                lists: listsData,
+              },
+            });
+            return next({type: 'LIST_OPERATION_SUCCESS'});
+          })
+          .catch((err: any) => {
+            return next({type: 'LIST_OPERATION_FAILURE', result: err});
+          });
+      case 'GET_LIST': {
+        console.log('Getting list');
+        return getFromStorage(`@lists`)
+          .then((listsData: any) => {
+            next({
+              type: 'UPDATE_ROOM_ITEMS',
+              payload: {
+                lists: listsData,
+              },
+            });
             return next({type: 'LIST_OPERATION_SUCCESS'});
           })
           .catch((err: any) => {

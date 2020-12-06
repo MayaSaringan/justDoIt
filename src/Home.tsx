@@ -1,28 +1,13 @@
 import React from 'react';
 import 'react-native-gesture-handler';
-import {
-  SafeAreaView,
-  StyleSheet,
-  StatusBar,
-  View,
-  Image,
-  FlatList,
-} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {Headline, withTheme, Title, List, IconButton} from 'react-native-paper';
+import {StyleSheet, StatusBar, View, FlatList} from 'react-native';
+import {withTheme, Title, List, IconButton, FAB} from 'react-native-paper';
 import {Theme} from 'react-native-paper/lib/typescript/src/types';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {connect, ConnectedProps} from 'react-redux';
-import {
-  RootStackParamList,
-  HomeScreenBaseProp,
-  LoadingScreenBaseProp,
-} from './common/NavigationParamList';
-import {addToList} from './redux/actions';
-import Todo from './data/Todo';
+import {HomeScreenBaseProp} from './common/NavigationParamList';
+import {addToList, getList, deleteItem} from './redux/actions';
 
-const RootStack = createStackNavigator<RootStackParamList>();
 type MyTheme = Theme & {
   colors: {
     primaryLight: string;
@@ -30,12 +15,10 @@ type MyTheme = Theme & {
   };
 };
 
-type LoadingProp = LoadingScreenBaseProp & {
-  theme: MyTheme;
-};
-
 const actionCreators = {
   addToList,
+  getList,
+  deleteItem,
 };
 
 const connector = connect((state: any) => {
@@ -47,11 +30,17 @@ type HomeProp = HomeScreenBaseProp &
     theme: MyTheme;
   };
 
-const HomeScreen = ({lists, theme /* navigation, addToList */}: HomeProp) => {
+const HomeScreen = ({
+  lists,
+  theme,
+  navigation,
+  getList,
+  deleteItem,
+}: HomeProp) => {
   React.useEffect(() => {
     changeNavigationBarColor(theme.colors.primaryDark, !theme.dark, true);
-  }, [theme.colors.primaryDark, theme.dark]);
-  // format the room items to the format the flat list expects
+    getList();
+  }, [theme.colors.primaryDark, theme.dark, getList]);
 
   const renderItem = ({item}: any) => {
     return (
@@ -61,11 +50,19 @@ const HomeScreen = ({lists, theme /* navigation, addToList */}: HomeProp) => {
         title={item.item}
         right={() => {
           return (
-            <IconButton
-              icon="checkbox-blank-circle-outline"
-              color={theme.colors.onSurface}
-              size={20}
-            />
+            <>
+              <IconButton
+                icon="checkbox-blank-circle-outline"
+                color={theme.colors.onSurface}
+                size={20}
+              />
+              <IconButton
+                icon="delete"
+                color={theme.colors.onSurface}
+                size={20}
+                onPress={() => deleteItem('uncategorized', item)}
+              />
+            </>
           );
         }}
       />
@@ -78,7 +75,10 @@ const HomeScreen = ({lists, theme /* navigation, addToList */}: HomeProp) => {
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
       <View
-        style={[styles.background, {backgroundColor: theme.colors.primary}]}>
+        style={[
+          styles.background,
+          {backgroundColor: theme.colors.primary, justifyContent: 'flex-start'},
+        ]}>
         <Title
           style={{
             fontSize: 36,
@@ -88,84 +88,40 @@ const HomeScreen = ({lists, theme /* navigation, addToList */}: HomeProp) => {
           }}>
           Todos
         </Title>
-        {lists.map((list: any) => {
-          const flatListData =
-            list.items.length > 0
-              ? list.items.map((item: Todo) => {
-                  return {item: item.item};
-                })
-              : [];
-          return (
-            <FlatList
-              key={list.listID}
-              style={{width: '100%'}}
-              keyExtractor={(item: any, index: number) => `list-item-${index}`}
-              data={flatListData}
-              renderItem={renderItem}
-            />
-          );
-        })}
-      </View>
-    </>
-  );
-};
-const LoadingScreen = ({theme, navigation}: LoadingProp) => {
-  React.useEffect(() => {
-    const loadPromise = () =>
-      new Promise((res: any) => {
-        setTimeout(() => res(), 500);
-      });
-
-    loadPromise().then(() => {
-      navigation.navigate('Home');
-    });
-  }, [navigation]);
-  return (
-    <>
-      <StatusBar
-        backgroundColor={theme.colors.primary}
-        barStyle={theme.dark ? 'light-content' : 'dark-content'}
-      />
-      <SafeAreaView>
-        <View
-          style={[styles.background, {backgroundColor: theme.colors.primary}]}>
-          <Image
-            // eslint-disable-next-line global-require
-            source={require('./assets/justDoIt.png')}
-            style={styles.logo}
-          />
-          <Headline>Welcome</Headline>
-        </View>
-      </SafeAreaView>
-    </>
-  );
-};
-const App = ({theme}: any) => {
-  React.useEffect(() => {
-    changeNavigationBarColor(theme.colors.primary, !theme.colors.dark, true);
-  }, [theme.colors.primary, theme.colors.dark]);
-  return (
-    <>
-      <View
-        style={{
-          width: '100%',
-          height: '100%',
-          backgroundColor: theme.colors.primary,
-        }}>
-        <NavigationContainer>
-          <RootStack.Navigator>
-            <RootStack.Screen
-              name="Loading"
-              component={withTheme(LoadingScreen)}
-              options={{headerShown: false}}
-            />
-            <RootStack.Screen
-              name="Home"
-              component={withTheme(connector(HomeScreen))}
-              options={{headerShown: false}}
-            />
-          </RootStack.Navigator>
-        </NavigationContainer>
+        {lists &&
+          Object.keys(lists).map((listID: any) => {
+            console.log(listID);
+            const list = lists[listID];
+            if (lists[listID]) {
+              const flatListData =
+                Object.keys(list.items).length > 0
+                  ? Object.keys(list.items).map((itemID: any) => {
+                      return {item: list.items[itemID].item, id: itemID};
+                    })
+                  : [];
+              return (
+                <FlatList
+                  key={listID}
+                  style={{width: '100%', flexGrow: 0}}
+                  keyExtractor={(item: any, index: number) =>
+                    `list-item-${index}`
+                  }
+                  data={flatListData}
+                  renderItem={renderItem}
+                />
+              );
+            }
+            return null;
+          })}
+        <FAB
+          style={styles.fab}
+          small
+          label="Add"
+          icon="plus"
+          onPress={() => {
+            navigation.navigate('AddItem');
+          }}
+        />
       </View>
     </>
   );
@@ -194,6 +150,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
   },
+  fab: {
+    alignSelf: 'flex-end',
+  },
 });
 
-export default withTheme(App);
+export default withTheme(connector(HomeScreen));
