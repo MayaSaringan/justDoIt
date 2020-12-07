@@ -21,3 +21,10 @@ export type AddItemScreenBaseProp = {
   navigation: StackNavigationProp<RootStackParamList, 'AddItem'>;
   route: RouteProp<RootStackParamList, 'AddItem'>;
 };
+
+// TAB NAVIGATION STUFF
+export type RootTabParamList = {
+  Main: undefined;
+  Lists: undefined;
+  About: undefined;
+};

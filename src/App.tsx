@@ -11,14 +11,19 @@ import {
 import {Theme} from 'react-native-paper/lib/typescript/src/types';
 import {Provider as ReduxProvider} from 'react-redux';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import HomeScreen from './Home';
 import AddItem from './AddItem';
 import LoadingScreen from './Launch';
-import {RootStackParamList} from './common/NavigationParamList';
-
+import {
+  RootStackParamList,
+  RootTabParamList,
+} from './common/NavigationParamList';
+import ListsScreen from './Lists';
 import store from './redux/store';
 
 const RootStack = createStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<RootTabParamList>();
 type MyTheme = Theme & {
   colors: {
     primaryLight: string;
@@ -92,6 +97,28 @@ const Main = () => {
     </ThemeProvider>
   );
 };
+
+const HomeStack = () => {
+  return (
+    <RootStack.Navigator>
+      <RootStack.Screen
+        name="Loading"
+        component={LoadingScreen}
+        options={{headerShown: false}}
+      />
+      <RootStack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{headerShown: false}}
+      />
+      <RootStack.Screen
+        name="AddItem"
+        component={AddItem}
+        options={{headerShown: false}}
+      />
+    </RootStack.Navigator>
+  );
+};
 const App = ({theme}: any) => {
   React.useEffect(() => {
     changeNavigationBarColor(theme.colors.primary, !theme.colors.dark, true);
@@ -105,23 +132,10 @@ const App = ({theme}: any) => {
           backgroundColor: theme.colors.primary,
         }}>
         <NavigationContainer>
-          <RootStack.Navigator>
-            <RootStack.Screen
-              name="Loading"
-              component={LoadingScreen}
-              options={{headerShown: false}}
-            />
-            <RootStack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{headerShown: false}}
-            />
-            <RootStack.Screen
-              name="AddItem"
-              component={AddItem}
-              options={{headerShown: false}}
-            />
-          </RootStack.Navigator>
+          <Tab.Navigator>
+            <Tab.Screen name="Main" component={HomeStack} />
+            <Tab.Screen name="Lists" component={ListsScreen} />
+          </Tab.Navigator>
         </NavigationContainer>
       </View>
     </>
