@@ -25,6 +25,17 @@ export const addToList = (listID: string, toDo: Todo) => async (
   });
 };
 
+export const addList = (listID: string ) => async (
+  dispatch: Dispatch,
+): Promise<ModifyListActionType> => {
+  return dispatch({
+    type: 'ADD_LIST',
+    payload: {
+      listID,
+    },
+  });
+};
+
 export const getList = () => async (
   dispatch: Dispatch,
 ): Promise<GetListActionType> => {

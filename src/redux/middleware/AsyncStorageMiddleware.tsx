@@ -2,6 +2,7 @@ import {Middleware} from 'redux';
 import {
   clearAllData,
   getFromStorage,
+  addList,
   addItemToList,
   deleteItemFromStorage,
 } from './AsyncStorageHelper';
@@ -12,7 +13,7 @@ import {
  */
 const middleware = (): Middleware<{}, any> => {
   /** ****** NEXT LINE IS FOR TESTING:  ******** */
-  clearAllData();
+ clearAllData();
   console.log('AsyncStorage middleware added.');
   return ({dispatch, getState}) => (next) => (action) => {
     if (typeof action === 'function') {
@@ -20,6 +21,21 @@ const middleware = (): Middleware<{}, any> => {
     }
 
     switch (action.type) {
+      case 'ADD_LIST':
+        console.log('Adding a list');
+        return addList(action.payload.listID )
+          .then((listsData: any) => {
+            next({
+              type: 'UPDATE_ROOM_ITEMS',
+              payload: {
+                lists: listsData,
+              },
+            });
+            return next({type: 'LIST_OPERATION_SUCCESS'});
+          })
+          .catch((err: any) => {
+            return next({type: 'LIST_OPERATION_FAILURE', result: err});
+          });
       case 'ADD_TO_LIST':
         console.log('Adding to list');
         return addItemToList(action.payload.listID, action.payload.item)

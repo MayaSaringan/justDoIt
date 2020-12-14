@@ -48,6 +48,8 @@ const HomeScreen = ({
         style={[styles.listItem]}
         titleStyle={{color: theme.colors.onSurface}}
         title={item.item}
+        description={item.listID}
+        descriptionStyle={{color: theme.colors.onSurface}}
         right={() => {
           return (
             <>
@@ -92,11 +94,11 @@ const HomeScreen = ({
           Object.keys(lists).map((listID: any) => {
             console.log(listID);
             const list = lists[listID];
-            if (lists[listID]) {
+            if (lists[listID]   ) {
               const flatListData =
                 Object.keys(list.items).length > 0
                   ? Object.keys(list.items).map((itemID: any) => {
-                      return {item: list.items[itemID].item, id: itemID};
+                      return {item: list.items[itemID].item, id: itemID, listID: listID};
                     })
                   : [];
               return (

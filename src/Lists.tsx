@@ -1,14 +1,14 @@
 import React from 'react';
 import 'react-native-gesture-handler';
 import {StyleSheet, StatusBar, View, FlatList} from 'react-native';
-import {withTheme, Title, List} from 'react-native-paper';
+import {withTheme, Title, List, FAB} from 'react-native-paper';
 import {connect} from 'react-redux';
 
 const connector = connect((state: any) => {
   return {lists: state.toDo.lists};
 }, null);
 
-const ListsScreen = ({lists, theme}: any) => {
+const ListsScreen = ({lists, theme, navigation}: any) => {
   const flatListData = lists
     ? Object.keys(lists).map((listID: any) => {
         return {
@@ -54,6 +54,15 @@ const ListsScreen = ({lists, theme}: any) => {
           keyExtractor={(item: any, index: number) => `list-item-${index}`}
           data={flatListData}
           renderItem={renderItem}
+        />
+        <FAB
+          style={styles.fab}
+          small
+          label="Add"
+          icon="plus"
+          onPress={() => {
+            navigation.navigate('AddList');
+          }}
         />
       </View>
     </>

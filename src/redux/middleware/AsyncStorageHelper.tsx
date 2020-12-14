@@ -58,6 +58,40 @@ export const mergeInStorage = (key: string, value: string): Promise<any> => {
   });
 };
 
+export const addList = (listID: string): Promise<any> => {
+  return new Promise((resolve: any, reject: any) => {
+    const newItemObj = {
+      [listID]: {
+        items: {
+        },
+      },
+    };
+    const newItemStr = JSON.stringify(newItemObj);
+    getFromStorage(STORAGE_LISTS_KEY)
+      .then(async (lists: any) => {
+        // If key is already defined in the storage, use the mergeItem API
+        // otherwise, use setItem
+        if (lists) {
+          mergeInStorage(`@lists`, newItemStr)
+            // AsyncStorage.mergeItem API docs says that the promise is supposed to return the new
+            // merged value for the given key, but it doesn't appear to work. Instead, requery
+            // the storage for the value @lists and forward it with next
+            .then(() => {
+              getFromStorage(STORAGE_LISTS_KEY).then((listsData: any) =>
+                resolve(listsData),
+              );
+            })
+            .catch((err: any) => reject(err));
+        } else {
+          setInStorage(`@lists`, newItemStr)
+            .then(() => resolve(newItemObj))
+            .catch((err: any) => reject(err));
+        }
+      })
+      .catch((err: any) => reject(err));
+  });
+};
+
 export const addItemToList = (listID: string, item: any): Promise<any> => {
   return new Promise((resolve: any, reject: any) => {
     const newItemObj = {

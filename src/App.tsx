@@ -14,6 +14,7 @@ import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import HomeScreen from './Home';
 import AddItem from './AddItem';
+import AddList from './AddList';
 import LoadingScreen from './Launch';
 import {
   RootStackParamList,
@@ -114,6 +115,11 @@ const HomeStack = () => {
       <RootStack.Screen
         name="AddItem"
         component={AddItem}
+        options={{headerShown: false}}
+      />
+      <RootStack.Screen
+        name="AddList"
+        component={AddList}
         options={{headerShown: false}}
       />
     </RootStack.Navigator>
